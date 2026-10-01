@@ -5,8 +5,8 @@ Every hour from 14:00 to 22:00 (Athens time), a GitHub Action checks
 contains "ΠΡΟΓΡΑΜΜΑ" (any case, with or without accents) and downloads its PDF if it is
 new or has changed. The 5 most recent PDFs are kept and published with GitHub Pages:
 
-- **Latest:** `https://yannisf.github.io/lyk_sched/programma-latest.pdf`
-- **List:** `https://yannisf.github.io/lyk_sched/`
+- **Latest:** `https://lyk.frlab.eu/programma-latest.pdf`
+- **List:** `https://lyk.frlab.eu/`
 
 ## Files
 
