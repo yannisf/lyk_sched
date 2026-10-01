@@ -1,0 +1,81 @@
+name: Fetch programma
+
+on:
+  schedule:
+    # Times are UTC. 11–20 UTC covers 14:00–22:00 Athens in both summer (UTC+3) and
+    # winter (UTC+2); the extra hour is skipped below. :17 avoids the busy top of the hour.
+    - cron: "17 11-20 * * *"
+  workflow_dispatch: # "Run workflow" button: always runs and redeploys the site
+
+permissions:
+  contents: write # commit new PDFs
+  pages: write
+  id-token: write
+
+concurrency:
+  group: fetch
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      deploy: ${{ steps.save.outputs.deploy }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Only 14:00–22:00 Athens time
+        id: window
+        run: |
+          h=$(TZ=Europe/Athens date +%-H)
+          if [ "$GITHUB_EVENT_NAME" = schedule ] && { [ "$h" -lt 14 ] || [ "$h" -gt 22 ]; }; then
+            echo "Athens time is $h:xx, outside 14:00–22:00. Skipping."
+            echo run=false >> "$GITHUB_OUTPUT"
+          else
+            echo run=true >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch latest PDF
+        if: steps.window.outputs.run == 'true'
+        # A failed fetch (site down/slow) is not a failed job: it will try again next hour.
+        run: python3 fetch_programma.py || echo "::warning::Could not fetch this hour; will try again next hour."
+
+      - name: Commit new PDF
+        id: save
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "New: $(python3 -c 'import json; print(json.load(open(".state.json"))["title"])')"
+            git push
+            echo deploy=true >> "$GITHUB_OUTPUT"
+          elif [ $(( $(date +%s) - $(git log -1 --format=%ct) )) -gt $(( 50 * 86400 )) ]; then
+            # GitHub disables scheduled workflows after 60 days without commits (e.g. summer break).
+            git commit --allow-empty -m "Keepalive"
+            git push
+          fi
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] && [ -f .state.json ]; then
+            echo deploy=true >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build site
+        if: steps.save.outputs.deploy == 'true'
+        run: python3 build_site.py
+
+      - uses: actions/upload-pages-artifact@v5
+        if: steps.save.outputs.deploy == 'true'
+        with:
+          path: _site
+
+  deploy:
+    needs: fetch
+    if: needs.fetch.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
