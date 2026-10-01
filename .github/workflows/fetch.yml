@@ -2,9 +2,9 @@ name: Fetch programma
 
 on:
   schedule:
-    # Times are UTC. 11–20 UTC covers 14:00–22:00 Athens in both summer (UTC+3) and
+    # Times are UTC. 12–19 UTC covers 15:00–21:00 Athens in both summer (UTC+3) and
     # winter (UTC+2); the extra hour is skipped below. :17 avoids the busy top of the hour.
-    - cron: "17 11-20 * * *"
+    - cron: "17 12-19 * * *"
   workflow_dispatch: # "Run workflow" button: always runs and redeploys the site
 
 permissions:
@@ -25,12 +25,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Only 14:00–22:00 Athens time
+      - name: Only 15:00–21:00 Athens time
         id: window
         run: |
           h=$(TZ=Europe/Athens date +%-H)
-          if [ "$GITHUB_EVENT_NAME" = schedule ] && { [ "$h" -lt 14 ] || [ "$h" -gt 22 ]; }; then
-            echo "Athens time is $h:xx, outside 14:00–22:00. Skipping."
+          if [ "$GITHUB_EVENT_NAME" = schedule ] && { [ "$h" -lt 15 ] || [ "$h" -gt 21 ]; }; then
+            echo "Athens time is $h:xx, outside 15:00–21:00. Skipping."
             echo run=false >> "$GITHUB_OUTPUT"
           else
             echo run=true >> "$GITHUB_OUTPUT"

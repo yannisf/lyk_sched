@@ -1,12 +1,12 @@
 # lyk_sched
 
-Every hour from 14:00 to 22:00 (Athens time), a GitHub Action checks
+Every hour from 15:00 to 21:00 (Athens time), a GitHub Action checks
 [22lyk-athin.att.sch.gr](http://22lyk-athin.att.sch.gr) for the newest post whose title
 contains "ΠΡΟΓΡΑΜΜΑ" (any case, with or without accents) and downloads its PDF if it is
 new or has changed. The 5 most recent PDFs are kept and published with GitHub Pages:
 
-- **Latest:** `https://lyk.frlab.eu/programma-latest.pdf`
-- **List:** `https://lyk.frlab.eu/`
+- **Latest:** <https://lyk.frlab.eu/programma-latest.pdf>
+- **List:** <https://lyk.frlab.eu/>
 
 ## Files
 
