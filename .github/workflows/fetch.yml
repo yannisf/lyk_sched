@@ -12,6 +12,9 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  TZ: Europe/Athens # local time everywhere: file names, the page, the hour check
+
 concurrency:
   group: fetch
   cancel-in-progress: false
@@ -28,7 +31,7 @@ jobs:
       - name: Only 15:00–21:00 Athens time
         id: window
         run: |
-          h=$(TZ=Europe/Athens date +%-H)
+          h=$(date +%-H)
           if [ "$GITHUB_EVENT_NAME" = schedule ] && { [ "$h" -lt 15 ] || [ "$h" -gt 21 ]; }; then
             echo "Athens time is $h:xx, outside 15:00–21:00. Skipping."
             echo run=false >> "$GITHUB_OUTPUT"

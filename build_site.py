@@ -2,8 +2,7 @@
 """Build the GitHub Pages site in _site/: the kept PDFs, a copy of the latest
 as programma-latest.pdf (Pages may not follow symlinks), and an index.html."""
 import html, json, os, shutil, urllib.parse
-from datetime import datetime, timezone
-from zoneinfo import ZoneInfo
+from datetime import datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SITE = os.path.join(HERE, "_site")
@@ -19,7 +18,7 @@ items = []
 for n in sorted(os.listdir(os.path.join(SITE, "pdfs")), reverse=True):
     if n.endswith(".pdf"):
         items.append(f'<li><a href="pdfs/{urllib.parse.quote(n)}">{html.escape(n)}</a></li>')
-now = datetime.now(timezone.utc).astimezone(ZoneInfo("Europe/Athens"))
+now = datetime.now()  # local time; the workflow sets TZ=Europe/Athens
 
 page = f"""<!doctype html>
 <html lang="el">
@@ -45,7 +44,7 @@ page = f"""<!doctype html>
 <ul>
 {chr(10).join(items)}
 </ul>
-<p><small>Updated {now:%Y-%m-%d %H:%M} (Athens time) from
+<p><small>Τελευταία ενημέρωση: {now:%d/%m/%Y %H:%M}, από το
 <a href="http://22lyk-athin.att.sch.gr">22lyk-athin.att.sch.gr</a>.</small></p>
 </body>
 </html>
