@@ -1,0 +1,43 @@
+name: Deploy site
+
+on:
+  push: # update.sh pushes new PDFs
+    branches: [main]
+    paths: [pdfs/**, .state.json, build_site.py, .github/workflows/pages.yml]
+  workflow_dispatch: # "Run workflow" button: redeploy without a new PDF
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  TZ: Europe/Athens # local time on the page
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build site
+        run: python3 build_site.py
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

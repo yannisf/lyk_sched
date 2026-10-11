@@ -18,7 +18,7 @@ items = []
 for n in sorted(os.listdir(os.path.join(SITE, "pdfs")), reverse=True):
     if n.endswith(".pdf"):
         items.append(f'<li><a href="pdfs/{urllib.parse.quote(n)}">{html.escape(n)}</a></li>')
-now = datetime.now()  # local time; the workflow sets TZ=Europe/Athens
+now = datetime.now()  # local time; pages.yml sets TZ=Europe/Athens
 
 page = f"""<!doctype html>
 <html lang="el">
